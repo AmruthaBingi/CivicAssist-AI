@@ -1,0 +1,85 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Connectivity verification path
+    match /test/{docId} {
+      allow read: if true;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isVerifiedUser() {
+      return isSignedIn() && (request.auth.token.email_verified == true || request.auth.token.firebase.sign_in_provider == 'google.com');
+    }
+
+    // Admin check: checks either Firestore /admins collection or verified runtime owner email
+    function isAdmin() {
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        (request.auth.token.email == "amruthabingi6@gmail.com" && (request.auth.token.email_verified == true || request.auth.token.firebase.sign_in_provider == 'google.com'))
+      );
+    }
+
+    function isOwner(ownerUid) {
+      return isSignedIn() && request.auth.uid == ownerUid;
+    }
+
+    // Admin directory
+    match /admins/{adminUid} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // Public Grievances collection
+    match /grievances/{grievanceId} {
+      // Single document lookup: only owner citizen or authorized admin
+      allow get: if isSignedIn() && (
+        resource.data.ownerUid == request.auth.uid ||
+        isAdmin()
+      );
+
+      // List query: only returns citizen's own grievances or all for admin
+      allow list: if isSignedIn() && (
+        resource.data.ownerUid == request.auth.uid ||
+        isAdmin()
+      );
+
+      // Create: Authenticated user creating their own grievance
+      allow create: if isSignedIn() &&
+        request.resource.data.ownerUid == request.auth.uid &&
+        request.resource.data.id == grievanceId &&
+        request.resource.data.id is string &&
+        request.resource.data.subject is string &&
+        request.resource.data.description is string &&
+        request.resource.data.category is string &&
+        request.resource.data.department is string &&
+        request.resource.data.area is string &&
+        request.resource.data.city is string &&
+        request.resource.data.pincode is string &&
+        request.resource.data.status in ['Submitted', 'Under Review', 'Assigned', 'In Progress', 'Resolved', 'Rejected'];
+
+      // Update: Admin can update status, remarks, assignment; Citizen can only submit feedback
+      allow update: if isSignedIn() && (
+        isAdmin() ||
+        (
+          isOwner(resource.data.ownerUid) &&
+          request.resource.data.ownerUid == resource.data.ownerUid &&
+          request.resource.data.id == resource.data.id &&
+          request.resource.data.diff(resource.data).affectedKeys().hasOnly(['feedbackRating', 'feedbackRemarks', 'updatedAt'])
+        )
+      );
+
+      // Delete: Only authorized admins
+      allow delete: if isAdmin();
+    }
+  }
+}

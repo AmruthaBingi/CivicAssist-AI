@@ -1,0 +1,6 @@
+{
+  "name": "CivicAssist AI",
+  "description": "Smart Public Grievance Assistant and Civic Services Directory for Indian Citizens and Municipal Administration.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

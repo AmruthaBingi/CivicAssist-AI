@@ -1,0 +1,152 @@
+{
+  "entities": {
+    "Grievance": {
+      "title": "Grievance",
+      "description": "Public grievance reported by an authenticated citizen.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique reference number, e.g. CA-2026-7841"
+        },
+        "ownerUid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the citizen who submitted the grievance"
+        },
+        "subject": {
+          "type": "string",
+          "description": "Brief title or summary of the public grievance"
+        },
+        "description": {
+          "type": "string",
+          "description": "Detailed description of the issue"
+        },
+        "category": {
+          "type": "string",
+          "description": "Category such as Roads & Infrastructure, Water Supply & Drainage, etc."
+        },
+        "department": {
+          "type": "string",
+          "description": "Assigned municipal department"
+        },
+        "area": {
+          "type": "string",
+          "description": "Ward or locality name"
+        },
+        "city": {
+          "type": "string",
+          "description": "City or municipality name"
+        },
+        "pincode": {
+          "type": "string",
+          "description": "6-digit postal code"
+        },
+        "landmark": {
+          "type": "string",
+          "description": "Optional nearest landmark"
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["Low", "Medium", "High", "Emergency"],
+          "description": "Severity level of the civic grievance"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["Submitted", "Under Review", "Assigned", "In Progress", "Resolved", "Rejected"],
+          "description": "Current status in the resolution lifecycle"
+        },
+        "citizenName": {
+          "type": "string",
+          "description": "Name of citizen"
+        },
+        "citizenPhone": {
+          "type": "string",
+          "description": "Contact phone number"
+        },
+        "citizenEmail": {
+          "type": "string",
+          "description": "Contact email"
+        },
+        "attachmentName": {
+          "type": "string",
+          "description": "Name of attached photo or document"
+        },
+        "attachmentData": {
+          "type": "string",
+          "description": "Thumbnail or preview data URL"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "ISO timestamp of submission"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "ISO timestamp of last update"
+        },
+        "estimatedResolutionDate": {
+          "type": "string",
+          "description": "Target resolution date based on SLA"
+        },
+        "assignedOfficer": {
+          "type": "object",
+          "description": "Contact details of assigned municipal officer"
+        },
+        "timeline": {
+          "type": "array",
+          "description": "Audit trail log entries of status transitions"
+        },
+        "resolutionRemarks": {
+          "type": "string",
+          "description": "Official remarks upon resolution or action"
+        },
+        "feedbackRating": {
+          "type": "number",
+          "description": "Citizen rating from 1 to 5"
+        },
+        "feedbackRemarks": {
+          "type": "string",
+          "description": "Citizen feedback comment"
+        }
+      },
+      "required": ["id", "ownerUid", "subject", "description", "category", "department", "area", "city", "pincode", "priority", "status", "citizenName", "createdAt"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Authorized municipal administrative staff member.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Auth UID of the admin"
+        },
+        "email": {
+          "type": "string",
+          "description": "Admin email address"
+        },
+        "name": {
+          "type": "string",
+          "description": "Admin display name"
+        },
+        "role": {
+          "type": "string",
+          "description": "Staff role e.g. Municipal Officer, Super Admin"
+        },
+        "assignedAt": {
+          "type": "string",
+          "description": "Timestamp when admin access was granted"
+        }
+      },
+      "required": ["uid", "email"]
+    }
+  },
+  "firestore": {
+    "/grievances/{grievanceId}": {
+      "schema": "Grievance",
+      "description": "Collection of public grievances indexed by unique reference ID"
+    },
+    "/admins/{adminUid}": {
+      "schema": "Admin",
+      "description": "List of authorized staff administrators"
+    }
+  }
+}
